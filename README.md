@@ -14,54 +14,93 @@ En desktop-applikasjon for å sortere bilder til mappestrukturer og finne duplik
 
 ## Teknologi
 
-- **Frontend**: TypeScript, HTML, CSS
-- **Backend**: Rust (via Tauri)
-- **Framework**: Tauri v2
+- **Frontend**: TypeScript, HTML, CSS (Vite)
+- **Backend**: Rust (via Tauri v2)
 - **Bildebehandling**: image-rs, img_hash
 
-## Utvikling
+## Kom i gang
 
 ### Forutsetninger
 
-- Rust (via rustup)
-- Node.js 18+
-- System dependencies (se `/setup` workflow)
+- [Rust](https://rustup.rs/) (via rustup)
+- [Node.js](https://nodejs.org/) 18+
+- Linux: `sudo apt install libwebkit2gtk-4.1-dev build-essential libssl-dev libayatana-appindicator3-dev librsvg2-dev`
 
-### Kom i gang
+### Installasjon
 
 ```bash
-# Installer dependencies
+git clone https://github.com/Hawk-on/ImageSorter.git
+cd ImageSorter
 npm install
-
-# Start utviklingsserver
 npm run tauri dev
+```
 
-# Bygg for produksjon
-npm run tauri build
+## Bidra til prosjektet
+
+### Branching-strategi
+
+Vi bruker en enkel branching-modell:
+
+| Branch | Formål |
+|--------|--------|
+| `master` | Stabil, produksjonsklar kode |
+| `dev` | Aktiv utvikling, neste release |
+| `feature/*` | Nye funksjoner (brancher fra `dev`) |
+| `fix/*` | Bugfikser (brancher fra `dev`) |
+
+### Workflow
+
+1. **Opprett feature branch** fra `dev`:
+   ```bash
+   git checkout dev
+   git pull origin dev
+   git checkout -b feature/min-nye-funksjon
+   ```
+
+2. **Gjør endringer** og commit:
+   ```bash
+   git add .
+   git commit -m "feat: beskrivelse av endring"
+   ```
+
+3. **Push og lag Pull Request**:
+   ```bash
+   git push -u origin feature/min-nye-funksjon
+   gh pr create --base dev --title "feat: beskrivelse"
+   ```
+
+4. **Etter godkjenning**: Merge til `dev`
+
+5. **Release**: `dev` merges til `master` når features er testet
+
+### Commit-konvensjoner
+
+Vi følger [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: ny funksjonalitet
+fix: bugfiks
+docs: dokumentasjonsendringer
+refactor: kodeomstrukturering
+test: tester
+chore: vedlikehold (deps, config)
 ```
 
 ## Prosjektstruktur
 
 ```
 ImageSorter/
-├── src/                    # Frontend kildekode
-│   ├── components/         # UI komponenter
-│   ├── services/           # Frontend tjenester
-│   ├── styles/             # CSS stiler
-│   └── main.ts             # Hovedinngang
-├── src-tauri/              # Rust backend
+├── src/                    # Frontend (TypeScript)
+│   ├── app.ts              # Hovedapplikasjon
+│   ├── main.ts             # Entry point
+│   └── styles/             # CSS
+├── src-tauri/              # Backend (Rust)
 │   ├── src/
-│   │   ├── commands/       # Tauri kommandoer
-│   │   ├── services/       # Backend tjenester
-│   │   │   ├── hashing.rs  # Bildehashing
-│   │   │   ├── scanner.rs  # Filskanning
-│   │   │   └── sorter.rs   # Bildesortering
-│   │   └── main.rs         # Rust hovedinngang
-│   └── Cargo.toml          # Rust dependencies
-├── .agent/                 # AI-assistent konfigurasjon
-│   └── workflows/          # Arbeidsflytdefinisjoner
+│   │   ├── commands/       # Tauri IPC kommandoer
+│   │   └── services/       # Forretningslogikk
+│   └── Cargo.toml
 ├── docs/                   # Dokumentasjon
-└── package.json            # npm konfigurasjon
+└── .agent/workflows/       # AI-assistent workflows
 ```
 
 ## Lisens
