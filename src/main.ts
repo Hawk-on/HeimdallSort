@@ -16,6 +16,9 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
           <p class="drop-hint">eller</p>
           <button class="btn btn-primary" id="select-folder">Velg mappe</button>
         </div>
+        <button class="btn btn-secondary collapse-btn" id="change-folder" style="display: none;">
+          📁 Bytt mappe
+        </button>
       </section>
 
       <section class="status-panel" id="status-panel">
