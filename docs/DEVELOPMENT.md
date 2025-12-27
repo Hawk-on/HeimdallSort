@@ -1,42 +1,78 @@
 # Utviklingsguide
 
+## Git Workflow
+
+### Branching
+
+```
+master (stabil)
+  └── dev (aktiv utvikling)
+       ├── feature/gallery-view
+       ├── feature/duplicate-detection
+       └── fix/dialog-permission
+```
+
+### Daglig utvikling
+
+```bash
+# Start på dev
+git checkout dev
+git pull origin dev
+
+# Lag feature branch
+git checkout -b feature/beskrivende-navn
+
+# Jobb, commit ofte
+git add .
+git commit -m "feat: kort beskrivelse"
+
+# Push og lag PR
+git push -u origin feature/beskrivende-navn
+gh pr create --base dev
+```
+
+### Pull Requests
+
+- PR skal alltid gå til `dev`, ikke `master`
+- Beskriv hva endringen gjør
+- Legg til screenshots for UI-endringer
+- Sørg for at koden bygger (`npm run tauri build`)
+
 ## Kodekonvensjoner
 
-### TypeScript/JavaScript
+### TypeScript
 
-- Bruk TypeScript for all frontend-kode
-- ESLint + Prettier for formatering
-- Functional components der mulig
 - Async/await fremfor callbacks
+- Streng typing (unngå `any`)
+- ESLint + Prettier
 
 ```typescript
 // ✅ God praksis
-async function loadImages(directory: string): Promise<ImageFile[]> {
-    const result = await invoke<ImageFile[]>('scan_directory', { directory });
-    return result;
+async function loadImages(directory: string): Promise<ImageInfo[]> {
+    return await invoke<ImageInfo[]>('scan_folder', { path: directory });
 }
 
 // ❌ Unngå
 function loadImages(directory, callback) {
-    invoke('scan_directory', { directory }).then(callback);
+    invoke('scan_folder', { path: directory }).then(callback);
 }
 ```
 
 ### Rust
 
-- Følg Rust idiomer og clippy-anbefalinger
-- Bruk `Result<T, E>` for feilhåndtering
-- Dokumenter public API med doc comments
+- Følg clippy-anbefalinger
+- `Result<T, E>` for feilhåndtering
+- Doc comments på public API
 
 ```rust
-/// Beregner perceptuell hash for et bilde.
-/// 
+/// Skanner en mappe rekursivt etter bilder.
+///
 /// # Arguments
-/// * `path` - Sti til bildefilen
-/// 
+/// * `path` - Sti til mappen som skal skannes
+///
 /// # Returns
-/// En 64-byte hash som representerer bildet
-pub fn calculate_phash(path: &Path) -> Result<Vec<u8>, HashError> {
+/// Liste med bildeinformasjon, eller feil
+pub fn scan_directory(path: &str) -> Result<Vec<ImageInfo>, ScanError> {
     // ...
 }
 ```
@@ -45,49 +81,82 @@ pub fn calculate_phash(path: &Path) -> Result<Vec<u8>, HashError> {
 
 | Type | Konvensjon | Eksempel |
 |------|------------|----------|
-| TypeScript filer | camelCase | `imageService.ts` |
-| Rust filer | snake_case | `image_service.rs` |
-| Komponenter | PascalCase | `ImageGallery.ts` |
+| TypeScript | camelCase | `imageService.ts` |
+| Rust | snake_case | `image_service.rs` |
 | CSS | kebab-case | `image-gallery.css` |
 
 ## Commit-meldinger
 
-Følg Conventional Commits:
-
 ```
-feat: legg til duplikatdeteksjon
-fix: rett feil i hashberegning
-docs: oppdater API-dokumentasjon
+feat: legg til bildegalleri
+fix: rett tilgangsfeil i dialog
+docs: oppdater README med git-workflow
 refactor: omstrukturer scanner-modul
-test: legg til tester for hashing
+test: legg til enhetstester for hashing
+chore: oppdater dependencies
 ```
 
 ## Testing
 
 ### Frontend
-
 ```bash
-npm test                 # Kjør alle tester
-npm run test:watch       # Watch mode
-npm run test:coverage    # Med dekning
+npm test              # Kjør tester
+npm run test:watch    # Watch mode
 ```
 
 ### Backend (Rust)
-
 ```bash
 cd src-tauri
-cargo test               # Kjør alle tester
-cargo test -- --nocapture # Med output
+cargo test            # Kjør tester
+cargo clippy          # Lint-sjekk
 ```
 
 ## Debugging
 
 ### Frontend
-- Bruk browser DevTools (høyreklikk → Inspect i dev mode)
-- `console.log` for rask debugging
-- Tauri DevTools for IPC-inspeksjon
+- DevTools: Høyreklikk → Inspect (eller F12)
+- Tauri console: Se Rust-output i terminalen
 
 ### Backend
-- Bruk `tracing` crate for logging
-- `RUST_LOG=debug npm run tauri dev` for verbose logging
-- rust-analyzer i editor for type hints
+```bash
+RUST_LOG=debug npm run tauri dev   # Verbose logging
+```
+
+## Vanlige oppgaver
+
+### Legge til ny Tauri-kommando
+
+1. Definer i `src-tauri/src/commands/`:
+   ```rust
+   #[tauri::command]
+   pub async fn min_kommando(arg: String) -> Result<String, String> {
+       Ok(format!("Mottok: {}", arg))
+   }
+   ```
+
+2. Registrer i `main.rs`:
+   ```rust
+   .invoke_handler(tauri::generate_handler![
+       commands::folder::scan_folder,
+       commands::folder::min_kommando
+   ])
+   ```
+
+3. Kall fra frontend:
+   ```typescript
+   const result = await invoke<string>('min_kommando', { arg: 'test' });
+   ```
+
+### Legge til ny permission
+
+Oppdater `src-tauri/capabilities/main.json`:
+```json
+{
+    "permissions": [
+        "core:default",
+        "dialog:allow-open",
+        "fs:read-all",
+        "ny-permission:her"
+    ]
+}
+```

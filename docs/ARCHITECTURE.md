@@ -129,6 +129,22 @@ interface DuplicateGroup {
 }
 ```
 
+### 3. Services (`src-tauri/src/services/`)
+- **scanner.rs**: Rekursiv filskanning (WalkDir), optimalisert for ytelse.
+- **hashing.rs**: Bildehashing (pHash, BK-Tree) for duplikatdeteksjon.
+- **thumbnail.rs**: Generering og caching av thumbnails for rask visning.
+- **metadata.rs**: Leser EXIF-data for sortering.
+- **sorter.rs**: Håndterer filoperasjoner (sortering, sletting, flytting).
+- **cache.rs**: Persistent lagring av hasher for å unngå reskanning.
+
+### 4. Viktige Biblioteker
+- `tauri`: Rammeverk.
+- `rayon`: Parallell prosessering.
+- `img_hash`: Perceptuell hashing.
+- `bk-tree`: Effektivt søk etter lignende bilder (O(N log N)).
+- `trash`: Sikker sletting til papirkurv.
+- `kamadak-exif`: Metadata-lesing.
+
 ## Ytelsesoptimalisering
 
 1. **Parallell prosessering**: Bruk Rayon for CPU-bundet arbeid
@@ -136,3 +152,4 @@ interface DuplicateGroup {
 3. **Hash caching**: Lagre beregnede hasher i SQLite
 4. **Lazy loading**: Last inn bilder etter behov i UI
 5. **Web Workers**: Offload tunge operasjoner fra hovedtråd
+```
