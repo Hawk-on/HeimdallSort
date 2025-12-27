@@ -3,7 +3,7 @@
 //! Støtter både eksakt hashing (SHA-256) og perceptuell hashing (pHash, dHash, aHash)
 //! Optimalisert for store bildesamlinger
 
-use image::{DynamicImage, GenericImageView, Rgba, RgbaImage};
+use image::{DynamicImage, GenericImageView};
 use img_hash::{HashAlg, HasherConfig, ImageHash};
 use sha2::{Digest, Sha256};
 use std::fs::File;

@@ -1,10 +1,9 @@
 //! Tjeneste for å lese metadata fra bilder (EXIF)
 
-use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
+use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
 use std::fs::File;
 use std::io::BufReader;
-use std::path::{Path, PathBuf};
-use std::time::SystemTime;
+use std::path::Path;
 
 /// prøver å lese opprettelsesdato fra bildet
 /// 1. Sjekker EXIF (DateTimeOriginal)

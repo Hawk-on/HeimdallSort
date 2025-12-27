@@ -4,7 +4,7 @@ use crate::services::{hashing, scanner, thumbnail, sorter};
 use crate::services::sorter::{OperationResult, SortConfig};
 use crate::services::hashing::ComparableHash;
 use rayon::prelude::*;
-use serde::{Serialize, Deserialize};
+use serde::Serialize;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, RwLock};

@@ -2,4 +2,3 @@
 
 pub mod folder;
 
-pub use folder::scan_folder;
