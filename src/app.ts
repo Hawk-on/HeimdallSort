@@ -463,6 +463,22 @@ export function setupApp() {
             virtualState.cols = Math.max(1, Math.floor((containerWidth - 32) / minColWidth)); // 32px padding
             virtualState.totalRows = Math.ceil(currentImages.length / virtualState.cols);
 
+            // Sync CSS grid columns force-match JS logic
+            scrollContent?.style.setProperty('--grid-cols', String(virtualState.cols));
+
+            // Beregn row height dynamisk
+            // Bredde på grid-item = (containerWidth - padding - (cols-1)*gap) / cols
+            // Padding = 32px (var(--spacing-xl) = 2rem = 32px, men container padding er kanskje ikke relevant for grid width?)
+            // Grid container padding er --spacing-sm (8px)
+            // La oss måle faktisk bredde på column via CSS logikk
+            const gap = 16;
+            const padding = 16; // left+right
+            const availableWidth = containerWidth - padding;
+            const colWidth = (availableWidth - (virtualState.cols - 1) * gap) / virtualState.cols;
+
+            // Høyde = colWidth (aspect-ratio: 1) + infoDel (ca 50px) + gap
+            virtualState.rowHeight = colWidth + 50 + gap;
+
             // Oppdater høyde på spacer
             const totalHeight = virtualState.totalRows * virtualState.rowHeight;
             if (spacer) spacer.style.height = `${totalHeight}px`;
@@ -692,8 +708,8 @@ export function setupApp() {
 
         item.innerHTML = `
       <div class="gallery-item-image">
-        <div class="thumbnail-placeholder">⏳</div>
-        <img src="" alt="${img.filename}" loading="lazy" decoding="async" style="display: none;" />
+        <div class="thumbnail-placeholder"></div>
+        <img src="" alt="${img.filename}" style="display: none;" />
         <div class="gallery-item-overlay">
         </div>
       </div>

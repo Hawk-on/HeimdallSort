@@ -1,20 +1,40 @@
-/* ImageSorter - Main Styles */
+/* Heimdall Sort - Main Styles */
 
 :root {
-  /* Colors */
-  --color-bg-primary: #0f0f1a;
-  --color-bg-secondary: #1a1a2e;
-  --color-bg-tertiary: #252542;
-  --color-accent-primary: #6366f1;
-  --color-accent-secondary: #8b5cf6;
-  --color-accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  /* Heimdall Theme - "Nordic Night" Palette */
+  --color-bg-primary: #1e293b;
+  /* Deep slate / iron */
+  --color-bg-secondary: #0f172a;
+  /* Darker night sky */
+  --color-bg-tertiary: #334155;
+  /* Lighter slate accents */
+
+  /* Glassmorphism - "Bifrost Ice" */
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(148, 163, 184, 0.1);
+  --glass-blur: blur(16px);
+
+  /* Accents - "Viking Gold" */
+  --color-accent-primary: #fbbf24;
+  /* Amber-400 */
+  --color-accent-secondary: #d97706;
+  /* Amber-600 */
+  --color-accent-glow: rgba(251, 191, 36, 0.4);
+  --color-accent-gradient: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+
+  /* Text */
   --color-text-primary: #f1f5f9;
-  --color-text-secondary: #94a3b8;
+  /* Slate-100 */
+  --color-text-secondary: #cbd5e1;
+  /* Slate-300 */
   --color-text-muted: #64748b;
-  --color-border: rgba(99, 102, 241, 0.2);
+  /* Slate-500 */
+
+  /* Functional */
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
+  --color-border: var(--glass-border);
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -24,76 +44,57 @@
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
 
-  /* Border radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  /* Radius - Sharp/Chiseled */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+  /* Shadows - Deep & Mystical */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 30px -5px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 25px rgba(251, 191, 36, 0.2);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 
   /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 350ms ease;
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Typography */
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
+  --font-display: "Cinzel Decorative", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
   font-weight: 400;
   color: var(--color-text-primary);
   background-color: var(--color-bg-primary);
+
+  /* Animations */
+  --anim-fade-up: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  --anim-pulse-glow: pulseGlow 3s ease-in-out infinite;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Runes decor helper */
+.rune-text {
+  font-family: var(--font-display);
+  letter-spacing: 0.1em;
 }
 
-body {
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Container */
+/* Container - Nordic Atmosphere */
 .container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   padding: var(--spacing-xl);
-  background:
-    radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-    var(--color-bg-primary);
-}
-
-/* Header */
-.header {
-  text-align: center;
-  margin-bottom: var(--spacing-2xl);
-}
-
-.header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  background: var(--color-accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: var(--spacing-sm);
-}
-
-.subtitle {
-  color: var(--color-text-secondary);
-  font-size: 1.125rem;
+  background-color: var(--color-bg-primary);
+  background-image:
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.95)),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2394a3b8' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed;
 }
 
 /* Main content */
@@ -102,52 +103,127 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   width: 100%;
 }
 
-/* Drop zone */
+/* Header - Heimdall Style */
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-lg) 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.1);
+  /* Subtle gold border */
+  margin-left: calc(var(--spacing-xl) * -1);
+  margin-right: calc(var(--spacing-xl) * -1);
+  width: calc(100% + var(--spacing-xl) * 2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: var(--color-accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: var(--spacing-xs);
+  filter: drop-shadow(0 2px 10px rgba(251, 191, 36, 0.3));
+  position: relative;
+  display: inline-block;
+}
+
+/* Runes decoration */
+.header h1::before,
+.header h1::after {
+  content: "ᛉ";
+  /* Algiz rune for protection */
+  color: var(--color-accent-primary);
+  -webkit-text-fill-color: var(--color-accent-primary);
+  font-family: sans-serif;
+  /* Fallback for runes */
+  font-size: 1.5rem;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+}
+
+.header h1::before {
+  left: -30px;
+}
+
+.header h1::after {
+  right: -30px;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Drop zone - Dragon Scroll Style */
 .drop-zone {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px dashed var(--color-border);
-  border-radius: var(--radius-xl);
+
+  /* Double border effect for 'dragon scale' feel */
+  border: 1px solid var(--color-text-muted);
+  outline: 1px dashed var(--color-text-muted);
+  outline-offset: -8px;
+
+  border-radius: var(--radius-lg);
   background: var(--color-bg-secondary);
   padding: var(--spacing-2xl);
-  transition: all var(--transition-normal);
+  transition: var(--transition-bounce);
   cursor: pointer;
   min-height: 300px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
 }
 
-.drop-zone.collapsed {
-  min-height: auto;
-  padding: var(--spacing-md);
-  flex: 0 0 auto;
+.drop-zone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(251, 191, 36, 0.1), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
 }
 
-.collapse-btn {
-  width: 100%;
-  justify-content: center;
-}
-
-.drop-zone:hover,
-.drop-zone.drag-over {
+.drop-zone:hover {
   border-color: var(--color-accent-primary);
-  background: var(--color-bg-tertiary);
-  box-shadow: var(--shadow-glow);
+  outline-color: var(--color-accent-primary);
+  box-shadow: 0 0 30px rgba(251, 191, 36, 0.15), inset 0 0 20px rgba(251, 191, 36, 0.05);
+  transform: scale(1.01);
 }
 
-.drop-zone-content {
-  text-align: center;
+.drop-zone:hover::before {
+  opacity: 1;
 }
 
 .drop-icon {
   font-size: 4rem;
   display: block;
   margin-bottom: var(--spacing-lg);
+  color: var(--color-accent-primary);
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.4));
   animation: float 3s ease-in-out infinite;
 }
 
@@ -174,33 +250,69 @@ body {
   margin-bottom: var(--spacing-md) !important;
 }
 
-/* Buttons */
+/* Buttons - Viking Treasure */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: 0.75rem 1.75rem;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 1rem;
-  font-weight: 500;
+  /* Less rounded, more strong */
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-primary {
-  background: var(--color-accent-gradient);
-  color: white;
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(to bottom, #fbbf24, #d97706);
+  color: #1e293b;
+  /* Dark text on gold */
+  box-shadow: 0 4px 0 #92400e, 0 5px 10px rgba(0, 0, 0, 0.3);
+  /* 3D effect */
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 0 #92400e, 0 10px 20px rgba(251, 191, 36, 0.3);
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #92400e, 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-text-muted);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Accent button (Finn Duplikater) - "Magic" */
+.btn-accent {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 0 #047857, 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-accent:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 0 #047857, 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
 /* Status panel */
@@ -221,29 +333,33 @@ body {
   color: var(--color-text-secondary);
 }
 
-/* Scrollbar styling */
+
+
+/* Scrollbar styling - Minimal */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-bg-tertiary);
-  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent-primary);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Gallery Section */
 .gallery-section {
   margin-top: var(--spacing-xl);
   max-width: 100%;
+  animation: var(--anim-fade-up);
 }
 
 .gallery-header {
@@ -251,12 +367,16 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-lg);
+  padding: 0 var(--spacing-xs);
 }
 
 .gallery-header h2 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .gallery-controls {
@@ -279,7 +399,8 @@ body {
 .virtual-scroll-container {
   position: relative;
   overflow-y: auto;
-  height: calc(100vh - 200px); /* Juster etter behov, f.eks. header høyde */
+  height: calc(100vh - 200px);
+  /* Juster etter behov, f.eks. header høyde */
   width: 100%;
 }
 
@@ -298,10 +419,11 @@ body {
   left: 0;
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(var(--grid-cols, auto-fill), minmax(160px, 1fr));
   gap: var(--spacing-md);
   padding: var(--spacing-sm);
-  will-change: transform; /* Optimalisering */
+  will-change: transform;
+  /* Optimalisering */
 }
 
 /* Gallery Grid (Legacy - kan fjernes når alt er portet, men behold for nå) */
@@ -327,8 +449,8 @@ body {
 }
 
 .gallery-item.selected {
-  border-color: var(--color-accent-primary);
-  box-shadow: var(--shadow-glow);
+  border: 2px solid var(--color-accent-primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
 }
 
 .gallery-item-image {
@@ -338,15 +460,19 @@ body {
   background: var(--color-bg-tertiary);
 }
 
+/* Skeleton Loading - Shimmer */
 .thumbnail-placeholder {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  color: var(--color-text-muted);
-  animation: pulse 1.5s ease-in-out infinite;
+  background: linear-gradient(90deg,
+      var(--color-bg-secondary) 0%,
+      var(--color-bg-tertiary) 50%,
+      var(--color-bg-secondary) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  display: block !important;
+  /* Alltid vis til bilde laster */
+  z-index: 1;
 }
 
 @keyframes pulse {
@@ -365,40 +491,84 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--transition-normal);
+  transition: transform 0.5s ease;
   will-change: transform;
-  backface-visibility: hidden; /* Forhindrer uskarphet under transformasjon */
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  animation: fadeIn 0.4s ease forwards;
 }
 
 .gallery-item:hover .gallery-item-image img {
-  transform: scale(1.05);
+  transform: scale(1.1);
+}
+
+/* Keyframes */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .gallery-item-overlay {
   position: absolute;
-  top: var(--spacing-sm);
-  left: var(--spacing-sm);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, transparent 40%, transparent 60%, rgba(0, 0, 0, 0.6) 100%);
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: opacity var(--transition-normal);
+  z-index: 5;
+  pointer-events: none;
+  /* Let clicks pass through */
 }
 
+/* Show overlay + checkbox on hover or selected */
 .gallery-item:hover .gallery-item-overlay,
 .gallery-item.selected .gallery-item-overlay {
   opacity: 1;
 }
 
-.gallery-checkbox {
+/* Checkbox styling */
+.gallery-item-overlay input[type="checkbox"] {
+  position: absolute;
+  top: 10px;
+  left: 10px;
   width: 20px;
   height: 20px;
   accent-color: var(--color-accent-primary);
+  pointer-events: auto;
+  /* Enable clicks */
   cursor: pointer;
 }
 
 .gallery-item-info {
-  padding: var(--spacing-sm);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(19, 19, 31, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .gallery-item-name {
@@ -549,22 +719,21 @@ body {
 .load-more-container .btn {
   min-width: 250px;
 }
-/* Modal Dialog */
+
+/* Modal Dialog - Glassmorphism */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.75);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  /* Strong blur behind modal */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
-  transition: all var(--transition-normal);
-  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
 }
 
 .modal-overlay.open {
@@ -573,25 +742,29 @@ body {
 }
 
 .modal {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
+  background: rgba(26, 26, 46, 0.85);
+  /* Semitransparent */
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
   width: 100%;
-  max-width: 500px;
-  box-shadow: var(--shadow-lg);
-  transform: translateY(20px);
-  transition: transform var(--transition-normal);
+  max-width: 480px;
+  box-shadow: var(--shadow-glass), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  transform: scale(0.95) translateY(10px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-overlay.open .modal {
-  transform: translateY(0);
+  transform: scale(1) translateY(0);
 }
 
 .modal-header h3 {
   color: white;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
   font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .modal-content {
@@ -606,7 +779,17 @@ body {
 }
 
 .form-group {
+  background: rgba(0, 0, 0, 0.2);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
   margin-bottom: var(--spacing-md);
+  border: 1px solid transparent;
+  transition: var(--transition-fast);
+}
+
+.form-group:hover {
+  border-color: var(--color-accent-primary);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .checkbox-label {

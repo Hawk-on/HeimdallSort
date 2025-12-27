@@ -1,8 +1,8 @@
-# ImageSorter - Arkitekturdokumentasjon
+# Heimdall Sort - Arkitekturdokumentasjon
 
 ## Oversikt
 
-ImageSorter er en desktop-applikasjon bygget med Tauri v2 som kombinerer en TypeScript/HTML frontend med en Rust backend for effektiv bildebehandling.
+Heimdall Sort er en desktop-applikasjon bygget med Tauri v2 som kombinerer en TypeScript/HTML frontend med en Rust backend for effektiv bildebehandling.
 
 ## Arkitekturdiagram
 
@@ -56,8 +56,8 @@ ImageSorter er en desktop-applikasjon bygget med Tauri v2 som kombinerer en Type
 |---------|--------|
 | **Scanner** | Traverserer mapper og finner bildefiler |
 | **Hashing** | Beregner perceptuelle og fil-hasher |
-| **Sorter** | Flytter/kopierer filer til målmapper |
-| **Cache** | Lagrer tidligere beregnede hasher |
+| **Sorter** | Flytter/kopierer filer basert på dato/metadata |
+| **Cache** | Persistent JSON-lagring av hasher |
 
 ## Duplikatdeteksjon
 
@@ -79,11 +79,11 @@ ImageSorter er en desktop-applikasjon bygget med Tauri v2 som kombinerer en Type
 ### Arbeidsflyt
 
 ```
-Skann mappe → Beregn hasher → Sammenlign → Grupper duplikater → Vis resultat
-     │              │              │              │                │
-     ▼              ▼              ▼              ▼                ▼
-  Parallell    Cache hasher   Hamming dist   Klynge-algo      Bruker-UI
-  traversering  for gjenbruk   beregning     for gruppering
+SKann mappe → Beregn hasher (sjekk JSON cache) → Bygg BK-Tree → Søk naboer → Grupper
+     │                   │                             │               │
+     ▼                   ▼                             ▼               ▼
+  Parallell    Cache hits sparer CPU             O(N log N)       O(N) effektiv
+  traversering                                   søk               gruppering
 ```
 
 ## Datamodeller
@@ -149,7 +149,7 @@ interface DuplicateGroup {
 
 1. **Parallell prosessering**: Bruk Rayon for CPU-bundet arbeid
 2. **Thumbnail caching**: Forhåndsgenererte thumbnails
-3. **Hash caching**: Lagre beregnede hasher i SQLite
-4. **Lazy loading**: Last inn bilder etter behov i UI
-5. **Web Workers**: Offload tunge operasjoner fra hovedtråd
+3. **Hash caching**: Lagre beregnede hasher i JSON-fil (`hash_cache.json`)
+4. **Virtuell Scrolling**: "Windowing" - rendrer kun synlige elementer (håndterer 10k+ bilder)
+5. **Debouncing**: Optimalisert UI-respons ved resizing og input
 ```

@@ -1,8 +1,8 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
-    "productName": "ImageSorter",
+    "productName": "Heimdall Sort",
     "version": "0.1.2",
-    "identifier": "no.haklon.imagesorter",
+    "identifier": "no.haklon.heimdallsort",
     "build": {
         "beforeDevCommand": "npm run dev",
         "devUrl": "http://localhost:1420",
@@ -24,7 +24,7 @@
         "withGlobalTauri": true,
         "windows": [
             {
-                "title": "ImageSorter",
+                "title": "Heimdall Sort",
                 "width": 1200,
                 "height": 800,
                 "minWidth": 800,

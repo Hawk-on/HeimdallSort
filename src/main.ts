@@ -4,7 +4,7 @@ import "./styles/main.css";
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div class="container">
     <header class="header">
-      <h1>🖼️ ImageSorter</h1>
+      <h1>🛡️ Heimdall Sort</h1>
       <p class="subtitle">Sorter bilder og finn duplikater</p>
     </header>
 
