@@ -337,6 +337,8 @@ body {
   height: 100%;
   object-fit: cover;
   transition: transform var(--transition-normal);
+  will-change: transform;
+  backface-visibility: hidden; /* Forhindrer uskarphet under transformasjon */
 }
 
 .gallery-item:hover .gallery-item-image img {

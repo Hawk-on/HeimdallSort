@@ -82,6 +82,29 @@ pub fn compute_perceptual_hash(
     Ok(hasher.hash_image(image))
 }
 
+/// Wrapper for ImageHash som implementerer bk_tree::Metric
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ComparableHash(pub ImageHash<Box<[u8]>>);
+
+/// Metrikk-implementasjon for BK-Tree
+pub struct PerceptualMetric;
+
+impl bk_tree::Metric<ComparableHash> for PerceptualMetric {
+
+    fn distance(&self, a: &ComparableHash, b: &ComparableHash) -> u32 {
+        a.0.dist(&b.0)
+    }
+    
+    fn threshold_distance(&self, a: &ComparableHash, b: &ComparableHash, threshold: u32) -> Option<u32> {
+        let dist = self.distance(a, b);
+        if dist <= threshold {
+            Some(dist)
+        } else {
+            None
+        }
+    }
+}
+
 /// Sammenligner to perceptuelle hasher og returnerer Hamming-distansen
 pub fn compare_hashes(hash1: &ImageHash, hash2: &ImageHash) -> u32 {
     hash1.dist(hash2)

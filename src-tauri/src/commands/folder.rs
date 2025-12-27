@@ -2,11 +2,13 @@
 
 use crate::services::{hashing, scanner, thumbnail, sorter};
 use crate::services::sorter::{OperationResult, SortConfig};
+use crate::services::hashing::ComparableHash;
 use rayon::prelude::*;
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex, RwLock};
+use crate::services::cache::HashCache;
 
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -100,30 +102,66 @@ pub async fn open_image(path: String) -> Result<(), String> {
 pub async fn find_duplicates(paths: Vec<String>, threshold: u32) -> Result<DuplicateResult, String> {
     let error_count = Mutex::new(0usize);
     
+    // Last inn cache (trådsikker for parallell tilgang)
+    let cache_dir = get_thumbnail_cache_dir(); // Vi gjenbruker denne mappen foreløpig
+    let cache = Arc::new(RwLock::new(HashCache::new(&cache_dir)));
+    
     // Beregn hasher parallelt for raskere prosessering
     let hashed_images: Vec<ImageWithHash> = paths
         .par_iter()
         .filter_map(|path_str| {
             let path = Path::new(path_str);
             
+            // Hent metadata for mtime sjekk
+            let metadata = match std::fs::metadata(path) {
+                Ok(m) => m,
+                Err(_) => {
+                    *error_count.lock().unwrap() += 1;
+                    return None;
+                }
+            };
+            
+            let mtime = metadata.modified().unwrap_or(std::time::UNIX_EPOCH);
+            let size_bytes = metadata.len();
+            let filename = path.file_name()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_default();
+
+            // 1. Sjekk cache (Read Lock)
+            {
+                let read_guard = cache.read().unwrap();
+                if let Some(cached_hash_str) = read_guard.get(path_str, mtime) {
+                    return Some(ImageWithHash {
+                        info: ImageInfo {
+                            path: path_str.clone(),
+                            filename,
+                            size_bytes,
+                        },
+                        hash: cached_hash_str,
+                    });
+                }
+            } // Read lock droppes her
+
+            // 2. Beregn hash hvis ikke i cache (Tung operasjon)
             match hashing::load_image(path) {
                 Ok(img) => {
                     match hashing::compute_perceptual_hash(&img, hashing::HashType::Difference) {
                         Ok(hash) => {
-                            let filename = path.file_name()
-                                .map(|s| s.to_string_lossy().to_string())
-                                .unwrap_or_default();
-                            let size_bytes = std::fs::metadata(path)
-                                .map(|m| m.len())
-                                .unwrap_or(0);
+                            let hash_str = hash.to_base64();
                             
+                            // 3. Oppdater cache (Write Lock)
+                            {
+                                let mut write_guard = cache.write().unwrap();
+                                write_guard.insert(path_str.clone(), mtime, hash_str.clone());
+                            }
+
                             Some(ImageWithHash {
                                 info: ImageInfo {
                                     path: path_str.clone(),
                                     filename,
                                     size_bytes,
                                 },
-                                hash: hash.to_base64(),
+                                hash: hash_str,
                             })
                         }
                         Err(_) => {
@@ -140,46 +178,64 @@ pub async fn find_duplicates(paths: Vec<String>, threshold: u32) -> Result<Dupli
         })
         .collect();
 
+    // Lagre cache til disk etter operasjon
+    if let Ok(read_guard) = cache.read() {
+        if let Err(e) = read_guard.save() {
+            eprintln!("Kunne ikke lagre hash cache: {}", e);
+        }
+    }
+
     let processed = hashed_images.len();
     
-    // Grupper bilder med lignende hasher
-    let mut groups: HashMap<usize, Vec<ImageInfo>> = HashMap::new();
-    let mut image_to_group: HashMap<usize, usize> = HashMap::new();
-    let mut next_group_id = 0usize;
+    // Bygg BK-Tree for raskt søk (O(N log N) vs O(N^2))
+    let mut tree: bk_tree::BKTree<ComparableHash, hashing::PerceptualMetric> = bk_tree::BKTree::new(hashing::PerceptualMetric);
+    let mut hash_to_indices: HashMap<ComparableHash, Vec<usize>> = HashMap::new();
 
-    for (i, img1) in hashed_images.iter().enumerate() {
-        if image_to_group.contains_key(&i) {
+    // 1. Bygg treet og indeksering
+    for (idx, img) in hashed_images.iter().enumerate() {
+        if let Ok(hash) = img_hash::ImageHash::<Box<[u8]>>::from_base64(&img.hash) {
+             let comp_hash = ComparableHash(hash);
+             tree.add(comp_hash.clone());
+             hash_to_indices.entry(comp_hash).or_default().push(idx);
+        }
+    }
+
+    // 2. Finn grupper
+    let mut groups: Vec<Vec<ImageInfo>> = Vec::new();
+    let mut visited: std::collections::HashSet<usize> = std::collections::HashSet::new();
+
+    for (i, img) in hashed_images.iter().enumerate() {
+        if visited.contains(&i) {
             continue;
         }
 
-        let mut group_members = vec![img1.info.clone()];
-        let group_id = next_group_id;
-        image_to_group.insert(i, group_id);
-
-        for (j, img2) in hashed_images.iter().enumerate().skip(i + 1) {
-            if image_to_group.contains_key(&j) {
-                continue;
-            }
-
-            if let (Ok(h1), Ok(h2)) = (
-                img_hash::ImageHash::<Box<[u8]>>::from_base64(&img1.hash),
-                img_hash::ImageHash::<Box<[u8]>>::from_base64(&img2.hash)
-            ) {
-                if h1.dist(&h2) <= threshold {
-                    group_members.push(img2.info.clone());
-                    image_to_group.insert(j, group_id);
+        if let Ok(hash) = img_hash::ImageHash::<Box<[u8]>>::from_base64(&img.hash) {
+            let comp_hash = ComparableHash(hash);
+            
+            // Finn alle hasher innenfor terskelverdien
+            let matches = tree.find(&comp_hash, threshold);
+            
+            let mut group_members: Vec<ImageInfo> = Vec::new();
+            
+            for (_dist, found_hash) in matches {
+                if let Some(indices) = hash_to_indices.get(found_hash) {
+                    for &idx in indices {
+                        if !visited.contains(&idx) {
+                            visited.insert(idx);
+                            group_members.push(hashed_images[idx].info.clone());
+                        }
+                    }
                 }
             }
-        }
 
-        if group_members.len() > 1 {
-            groups.insert(group_id, group_members);
+            if group_members.len() > 1 {
+                groups.push(group_members);
+            }
         }
-        next_group_id += 1;
     }
 
     let duplicate_groups: Vec<DuplicateGroup> = groups
-        .into_values()
+        .into_iter()
         .map(|images| DuplicateGroup { images })
         .collect();
 
@@ -193,7 +249,7 @@ pub async fn find_duplicates(paths: Vec<String>, threshold: u32) -> Result<Dupli
     Ok(DuplicateResult {
         groups: duplicate_groups,
         total_duplicates,
-        processed: hashed_images.len(),
+        processed,
         errors,
     })
 }

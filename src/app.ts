@@ -518,8 +518,15 @@ export function setupApp() {
         header.className = "gallery-header";
         header.innerHTML = `
       <h2>🔍 Duplikatgrupper (${groups.length})</h2>
-      <button class="btn btn-secondary" id="close-duplicates">✕ Lukk</button>
+      <div class="duplicate-controls">
+          <button class="btn btn-danger" id="delete-duplicates-btn">🗑️ Slett valgte duplikater</button>
+          <button class="btn btn-secondary" id="close-duplicates">✕ Lukk</button>
+      </div>
     `;
+
+        // Skjul hovedgalleri
+        const gallerySection = document.getElementById("gallery-section");
+        if (gallerySection) gallerySection.style.display = "none";
 
         section.appendChild(header);
 
@@ -559,6 +566,47 @@ export function setupApp() {
 
         document.getElementById("close-duplicates")?.addEventListener("click", () => {
             section.remove();
+            // Vis hovedgalleri igjen
+            if (gallerySection) gallerySection.style.display = "block";
+        });
+
+        document.getElementById("delete-duplicates-btn")?.addEventListener("click", async () => {
+            const checkboxes = section.querySelectorAll(".gallery-checkbox:checked") as NodeListOf<HTMLInputElement>;
+            const selectedPaths = Array.from(checkboxes).map(cb => cb.dataset.path).filter(p => p !== undefined) as string[];
+
+            if (selectedPaths.length === 0) {
+                alert("Ingen duplikater valgt");
+                return;
+            }
+
+            if (!confirm(`Vil du slette ${selectedPaths.length} duplikater?`)) return;
+
+            try {
+                const result = await invoke<OperationResult>("delete_images", { paths: selectedPaths });
+
+                let msg = `Slettet ${result.success} duplikater.`;
+                if (result.errors > 0) msg += ` ${result.errors} feil.`;
+                alert(msg);
+
+                // Fjern slettede elementer fra DOM
+                selectedPaths.forEach(path => {
+                    const item = section.querySelector(`.gallery-item[data-path="${CSS.escape(path)}"]`);
+                    item?.remove();
+                });
+
+                // Sjekk om grupper er tomme
+                section.querySelectorAll(".duplicate-group").forEach(group => {
+                    if (group.querySelectorAll(".gallery-item").length < 2) {
+                        // Hvis bare 1 (original) eller 0 igjen, fjern gruppen??
+                        // Bruker vil kanskje beholde originalen i visningen til de lukker?
+                        // La oss la dem stå, men kanskje markere at gruppen er løst.
+                    }
+                });
+
+            } catch (error) {
+                console.error("Feil ved sletting av duplikater:", error);
+                alert(`Feil: ${error}`);
+            }
         });
     }
 
