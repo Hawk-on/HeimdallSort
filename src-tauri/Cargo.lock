@@ -1509,6 +1509,32 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
+name = "heimdall_sort"
+version = "0.1.0"
+dependencies = [
+ "bk-tree",
+ "chrono",
+ "dirs 5.0.1",
+ "hex",
+ "image",
+ "img_hash",
+ "kamadak-exif",
+ "open",
+ "rayon",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-opener",
+ "tempfile",
+ "tokio",
+ "trash",
+ "walkdir",
+]
+
+[[package]]
 name = "hermit-abi"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1779,32 +1805,6 @@ dependencies = [
  "num-rational",
  "num-traits",
  "png 0.16.8",
-]
-
-[[package]]
-name = "imagesorter"
-version = "0.1.0"
-dependencies = [
- "bk-tree",
- "chrono",
- "dirs 5.0.1",
- "hex",
- "image",
- "img_hash",
- "kamadak-exif",
- "open",
- "rayon",
- "serde",
- "serde_json",
- "sha2",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-opener",
- "tempfile",
- "tokio",
- "trash",
- "walkdir",
 ]
 
 [[package]]

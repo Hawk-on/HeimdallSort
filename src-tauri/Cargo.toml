@@ -1,12 +1,12 @@
 [package]
-name = "imagesorter"
+name = "heimdall_sort"
 version = "0.1.0"
-description = "En desktop-applikasjon for å sortere bilder og finne duplikater"
+description = "Heimdall Sort - Premium Image Organization"
 authors = ["haklon"]
 edition = "2021"
 
 [lib]
-name = "imagesorter_lib"
+name = "heimdall_sort_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

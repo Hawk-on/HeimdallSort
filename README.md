@@ -1,4 +1,4 @@
-# ImageSorter
+# Heimdall Sort 🛡️
 
 En desktop-applikasjon for å sortere bilder til mappestrukturer og finne duplikater ved hjelp av perceptuell hashing.
 
@@ -9,7 +9,11 @@ En desktop-applikasjon for å sortere bilder til mappestrukturer og finne duplik
   - Eksakt matching (fil-hash)
   - Perceptuell hashing (pHash, dHash, aHash)
   - Visuell likhetsammenligning
-- ⚡ **Rask ytelse**: Rust-backend for effektiv bildebehandling
+- ⚡ **Rask ytelse**:
+  - Rust-backend for effektiv bildebehandling
+  - **O(N log N)** duplikatdeteksjon med BK-Tree 🌳
+  - **Persistent Caching** av hasher for umiddelbar respons 🚀
+  - **Virtuell Scrolling** for å håndtere titusenvis av bilder sømløst
 - 🎨 **Moderne UI**: Responsivt brukergrensesnitt bygget med webteknologi
 
 ## Teknologi
@@ -29,8 +33,8 @@ En desktop-applikasjon for å sortere bilder til mappestrukturer og finne duplik
 ### Installasjon
 
 ```bash
-git clone https://github.com/Hawk-on/ImageSorter.git
-cd ImageSorter
+git clone https://github.com/Hawk-on/HeimdallSort.git
+cd HeimdallSort
 npm install
 npm run tauri dev
 ```
@@ -89,7 +93,7 @@ chore: vedlikehold (deps, config)
 ## Prosjektstruktur
 
 ```
-ImageSorter/
+HeimdallSort/
 ├── src/                    # Frontend (TypeScript)
 │   ├── app.ts              # Hovedapplikasjon
 │   ├── main.ts             # Entry point
