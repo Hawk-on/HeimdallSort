@@ -6,10 +6,16 @@ import { state } from "./state";
 import { setupVirtualScroll, renderVirtualItems } from "./virtual-scroll";
 import { startDuplicateDetection } from "./duplicates"; // Forward reference
 import { updateStatus } from "./ui";
+import { toast } from "./toast";
 
 let scrollContainer: HTMLDivElement | null = null;
 let spacer: HTMLDivElement | null = null;
 let scrollContent: HTMLDivElement | null = null;
+
+const VIDEO_EXTENSIONS = ["mp4", "mov", "avi", "mkv", "webm", "wmv", "m4v"];
+function isVideo(ext: string): boolean {
+    return VIDEO_EXTENSIONS.includes(ext.toLowerCase());
+}
 
 export function initGallery() {
     const app = document.getElementById("app");
@@ -99,6 +105,7 @@ export function createGalleryItem(img: ImageInfo, index: number): HTMLDivElement
         <div class="thumbnail-placeholder"></div>
         <img src="" alt="${img.filename}" style="display: none;" />
         <div class="gallery-item-overlay">
+            ${isVideo(img.extension) ? '<div class="video-indicator">▶</div>' : ''}
         </div>
       </div>
       <div class="gallery-item-info">
@@ -191,7 +198,7 @@ function toggleSelectAll() {
 async function deleteSelected() {
     const selected = state.getSelectedImages();
     if (selected.length === 0) {
-        alert("Ingen bilder valgt");
+        toast.show("Ingen bilder valgt", "warning");
         return;
     }
 
@@ -209,7 +216,12 @@ async function deleteSelected() {
         if (result.errors > 0) msg += ` ${result.errors} feil.`;
 
         updateStatus(msg);
-        alert(msg);
+        // alert(msg); - Removed in favor of toast
+        if (result.errors > 0) {
+            toast.show(msg, "warning");
+        } else {
+            toast.show(msg, "success");
+        }
 
         if (result.success > 0) {
             const newImages = state.currentImages.filter(img => !paths.includes(img.path));
@@ -220,7 +232,7 @@ async function deleteSelected() {
 
     } catch (error) {
         console.error("Feil ved sletting:", error);
-        alert(`Feil ved sletting: ${error}`);
+        toast.show(`Feil ved sletting: ${error}`, "error");
     } finally {
         btn?.classList.remove("loading");
     }
@@ -251,7 +263,12 @@ async function moveSelected() {
         if (result.errors > 0) msg += ` ${result.errors} feil.`;
 
         updateStatus(msg);
-        alert(msg);
+        // alert(msg);
+        if (result.errors > 0) {
+            toast.show(msg, "warning");
+        } else {
+            toast.show(msg, "success");
+        }
 
         if (result.success > 0) {
             const newImages = state.currentImages.filter(img => !paths.includes(img.path));
@@ -261,7 +278,7 @@ async function moveSelected() {
         }
 
     } catch (error) {
-        alert(`Feil ved flytting: ${error}`);
+        toast.show(`Feil ved flytting: ${error}`, "error");
     } finally {
         document.getElementById("move-selected")?.classList.remove("loading");
     }
@@ -352,7 +369,7 @@ async function sortImages() {
 
         let message = `Sortering ferdig: ${result.success} kopiert, ${result.errors} feil.`;
         updateStatus(message);
-        alert(message);
+        toast.show(message, result.errors > 0 ? "warning" : "success");
 
     } catch (error) {
         updateStatus(`Feil ved sortering: ${error}`);

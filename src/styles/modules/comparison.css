@@ -1,0 +1,91 @@
+/* Comparison View Styles */
+.comparison-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.comparison-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.comparison-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-xl);
+    overflow: hidden;
+    height: calc(100vh - 160px);
+    /* Adjust based on header/footer */
+}
+
+.comparison-image-container {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-lg);
+    background: rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.comparison-image-container.selected {
+    border-color: var(--color-success);
+    box-shadow: 0 0 20px rgba(0, 230, 118, 0.2);
+}
+
+.comparison-image-container.rejected {
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+
+.comparison-img-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.comparison-img-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.comparison-info {
+    padding: var(--spacing-md);
+    background: rgba(0, 0, 0, 0.8);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.comparison-footer {
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: var(--color-text-secondary);
+}

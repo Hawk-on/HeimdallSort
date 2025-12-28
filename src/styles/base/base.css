@@ -1,0 +1,105 @@
+:root {
+    /* Fargepalett - Mørkt tema, premium look */
+    --color-bg-primary: #12121a;
+    --color-bg-secondary: #0a0a0f;
+    /* Mørkere bakgrunn for sidepanel/header */
+    --color-bg-hover: #1e1e2d;
+    --color-bg-card: #181824;
+    /* Kort farge */
+
+    --color-text-primary: #e0e0e0;
+    --color-text-secondary: #a0a0b0;
+    --color-text-muted: #606070;
+
+    --color-accent-primary: #7c4dff;
+    /* Deep Purple */
+    --color-accent-secondary: #ff4081;
+    /* Pink accent */
+    --color-accent-glow: rgba(124, 77, 255, 0.4);
+
+    --color-success: #00e676;
+    --color-warning: #ffea00;
+    --color-danger: #ff1744;
+
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 16px;
+
+    --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 8px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.5);
+
+    --font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+}
+
+:root[data-theme="light"] {
+    --color-bg-primary: #f8f9fa;
+    --color-bg-secondary: #ffffff;
+    --color-bg-hover: #e9ecef;
+    --color-bg-card: #ffffff;
+
+    --color-text-primary: #212529;
+    --color-text-secondary: #495057;
+    --color-text-muted: #868e96;
+
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family-base);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-primary);
+}
+
+p {
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3a3a4c;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #505060;
+}

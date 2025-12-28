@@ -2,6 +2,7 @@
 //!
 //! Genererer thumbnails på forespørsel og cacher dem for raskere lasting.
 
+use image::GenericImageView;
 use sha2::{Digest, Sha256};
 use std::fs::{self, File};
 use std::io::Read;
@@ -28,14 +29,53 @@ pub fn get_or_create_thumbnail(
     // Sørg for at cache-mappen finnes
     fs::create_dir_all(cache_dir)?;
 
-    // Last og resize bildet
-    let img = load_image(image_path)?;
-    let thumbnail = img.thumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+    let ext = image_path
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.to_lowercase())
+        .unwrap_or_default();
 
-    // Lagre som JPEG med god komprimering
-    thumbnail.save(&thumbnail_path)?;
+    let video_extensions = ["mp4", "mov", "avi", "mkv", "webm", "wmv", "m4v"];
+
+    if video_extensions.contains(&ext.as_str()) {
+        generate_video_thumbnail(image_path, &thumbnail_path)?;
+    } else {
+        // Last og resize bildet (Opprinnelig logikk)
+        let img = load_image(image_path)?;
+        let thumbnail = img.thumbnail(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+        // Lagre som JPEG med god komprimering
+        thumbnail.save(&thumbnail_path)?;
+    }
 
     Ok(thumbnail_path)
+}
+
+fn generate_video_thumbnail(input: &Path, output: &Path) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    use std::process::Command;
+    
+    // Bruk ffmpeg til å hente ut en frame
+    // -y: overskriv
+    // -ss: seek til 1 sekund (unngå svart start-frame)
+    // -i: input
+    // -vframes 1: kun ett bilde
+    // -q:v 2: god kvalitet jpeg
+    
+    let status = Command::new("ffmpeg")
+        .args(&[
+            "-y",
+            "-ss", "00:00:01",
+            "-i", input.to_str().unwrap_or_default(), // todo: handle formatting error?
+            "-vframes", "1",
+            "-q:v", "2",
+            output.to_str().unwrap_or_default(),
+        ])
+        .status()?;
+
+    if !status.success() {
+        return Err("Feil ved generering av video-thumbnail (ffmpeg feilet)".into());
+    }
+    
+    Ok(())
 }
 
 /// Laster et bilde fra fil

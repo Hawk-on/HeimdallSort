@@ -3,12 +3,14 @@
 //! Støtter både eksakt hashing (SHA-256) og perceptuell hashing (pHash, dHash, aHash)
 //! Optimalisert for store bildesamlinger
 
-use image::{DynamicImage, GenericImageView};
+use image::{DynamicImage, GenericImageView, Rgba, RgbaImage};
 use img_hash::{HashAlg, HasherConfig, ImageHash};
 use sha2::{Digest, Sha256};
 use std::fs::File;
 use std::io::Read;
+use std::io::Read;
 use std::path::Path;
+use exif;
 
 /// Hashe-typer tilgjengelig for duplikatdeteksjon
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -30,7 +32,7 @@ pub struct HashResult {
     pub hash_type: String,
 }
 
-/// Beregner eksakt SHA-256 hash av en fil
+/// Beregn eksakt SHA-256 hash av en fil
 pub fn compute_exact_hash(path: &Path) -> Result<String, Box<dyn std::error::Error>> {
     let mut file = File::open(path)?;
     let mut buffer = Vec::new();
@@ -43,21 +45,78 @@ pub fn compute_exact_hash(path: &Path) -> Result<String, Box<dyn std::error::Err
     Ok(hex::encode(result))
 }
 
+/// Leser første 4KB og siste 4KB av filen for en rask "unikhetssjekk"
+/// Dette er mye raskere enn å lese hele filen eller dekode bildet
+pub fn compute_partial_hash(path: &Path) -> Result<String, Box<dyn std::error::Error>> {
+    let mut file = File::open(path)?;
+    let len = file.metadata()?.len();
+    let chunk_size = 4096;
+    
+    let mut hasher = Sha256::new();
+    
+    // Les start
+    let mut buffer = vec![0; chunk_size];
+    let bytes_read = file.read(&mut buffer)?;
+    hasher.update(&buffer[..bytes_read]);
+    
+    // Hvis filen er stor nok, les slutt
+    if len > (chunk_size as u64) * 2 {
+        use std::io::Seek;
+        file.seek(std::io::SeekFrom::End(-(chunk_size as i64)))?;
+        let bytes_read_end = file.read(&mut buffer)?;
+        hasher.update(&buffer[..bytes_read_end]);
+    }
+    
+    // Legg til filstørrelse i hashen for sikkerhets skyld
+    hasher.update(&len.to_le_bytes());
+    
+    Ok(hex::encode(hasher.finalize()))
+}
+
+/// Forsøker å lese embedded thumbnail fra EXIF-data
+/// Dette er ekstremt mye raskere enn å dekode hele bildet
+fn read_embedded_thumbnail(path: &Path) -> Option<DynamicImage> {
+    let file = std::fs::File::open(path).ok()?;
+    let mut bufreader = std::io::BufReader::new(&file);
+    let exifreader = exif::Reader::new();
+    
+    // Forsøk å lese EXIF-data
+    if let Ok(exif) = exifreader.read_from_container(&mut bufreader) {
+        // Sjekk om det finnes thumbnail-data
+        if let Some(thumb_data) = exif.get_thumbnail() {
+            // Prøv å dekode thumbnail-data som et bilde
+            // Vi bruker image::load_from_memory som gjetter formatet (vanligvis JPEG)
+            if let Ok(img) = image::load_from_memory(thumb_data) {
+                return Some(img);
+            }
+        }
+    }
+    None
+}
+
 /// Laster et bilde fra fil og skalerer ned for raskere hashing
-/// "Juksemetode": Bruker Nearest Neighbor for lynrask nedskalering og buffered reader.
+/// Optimalisert versjon: Prøver embedded thumbnail først!
 pub fn load_image(path: &Path) -> Result<DynamicImage, Box<dyn std::error::Error>> {
-    // 1. Åpne filen med en bufret leser for ytelse
+    // 1. Prøv "Fast Path" - Embedded Thumbnail
+    // Dette kan spare 100-500ms per bilde for store filer (RAW/høyoppløselig JPEG)
+    if let Some(thumb) = read_embedded_thumbnail(path) {
+        // Thumbnail er vanligvis allerede liten (f.eks. 160x120 eller 320x240)
+        // Vi sjekker likevel størrelsen før evt. nedskalering
+        let (width, height) = thumb.dimensions();
+        if width > 512 || height > 512 {
+            return Ok(thumb.resize(512, 512, image::imageops::FilterType::Nearest));
+        }
+        return Ok(thumb);
+    }
+
+    // 2. "Slow Path" - Full dekoding
+    // Fallback hvis ingen thumbnail finnes
     let reader = image::io::Reader::open(path)?
         .with_guessed_format()?;
 
-    // 2. Dekod bildet (dette er fortsatt nødvendig for å få piksldata)
-    // Fremtidig optimalisering: For JPEG kunne vi brukt en decoder som støtter 'scale_factor' (DCT scaling)
-    // for å dekode direkte til en mindre størrelse, men 'image' crate støtter ikke dette fullt ut enda.
     let img = reader.decode()?;
 
-    // 3. "Juksemetoden" for resizing:
-    // Bruk Nearest Neighbor. Det beholder ikke bildekvaliteten, men er ekstremt raskt.
-    // Vi trenger bare "formen" på bildet for hashing, ikke pene piksler.
+    // 3. Resize for hashing
     let (width, height) = img.dimensions();
     if width > 512 || height > 512 {
         Ok(img.resize(512, 512, image::imageops::FilterType::Nearest))

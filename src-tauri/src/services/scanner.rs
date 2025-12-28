@@ -14,7 +14,10 @@ pub struct ImageInfo {
 
 /// Støttede bildeformater
 const SUPPORTED_EXTENSIONS: &[&str] = &[
+    // Bilder
     "jpg", "jpeg", "png", "gif", "bmp", "webp", "tiff", "tif", "ico", "heic", "heif",
+    // Video
+    "mp4", "mov", "avi", "mkv", "webm", "wmv", "m4v",
 ];
 
 /// Sjekker om en filendelse er støttet
@@ -81,7 +84,8 @@ mod tests {
         assert!(SUPPORTED_EXTENSIONS.contains(&"webp"));
         assert!(!SUPPORTED_EXTENSIONS.contains(&"txt"));
         assert!(!SUPPORTED_EXTENSIONS.contains(&"pdf"));
-        assert!(!SUPPORTED_EXTENSIONS.contains(&"mp4"));
+        assert!(SUPPORTED_EXTENSIONS.contains(&"mp4"));
+        assert!(SUPPORTED_EXTENSIONS.contains(&"mov"));
     }
 
     #[test]

@@ -6,4 +6,5 @@ pub mod thumbnail;
 pub mod metadata;
 pub mod sorter;
 pub mod cache;
+pub mod sidecar;
 

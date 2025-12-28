@@ -3,6 +3,7 @@
 export interface ImageInfo {
     path: string;
     filename: string;
+    extension: string;
     sizeBytes: number;
 }
 
@@ -28,4 +29,8 @@ export interface OperationResult {
     success: number;
     errors: number;
     errorMessages: string[];
+}
+export interface SortConfig {
+    useDayFolder: boolean;
+    useMonthNames: boolean;
 }

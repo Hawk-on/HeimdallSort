@@ -1,9 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
+import { toast } from "./toast";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { DuplicateResult, DuplicateGroup, ImageInfo, OperationResult } from "./types";
 import { state, CONFIG } from "./state";
 import { updateStatus } from "./ui";
+import { comparisonManager } from "./comparison";
 
 export async function startDuplicateDetection() {
     if (state.currentImages.length === 0) {
@@ -110,7 +112,7 @@ function createGroupElement(group: DuplicateGroup, groupIndex: number): HTMLElem
     groupGrid.className = "duplicate-grid";
 
     // Original is usually first
-    const original = group.images[0];
+    // const original = group.images[0];
 
     group.images.forEach((img, index) => {
         const item = createDuplicateItem(img, index === 0);
@@ -120,13 +122,23 @@ function createGroupElement(group: DuplicateGroup, groupIndex: number): HTMLElem
     groupDiv.appendChild(groupHeader);
     groupDiv.appendChild(groupGrid);
 
-    // Bind Compare Button
-    groupHeader.querySelector(".compare-btn")?.addEventListener("click", () => {
-        // Compare first duplicate with original
-        if (group.images.length > 1) {
-            showSideBySide(original, group.images[1], group.images.slice(2));
-        }
+    // Bind Compare Button (prevent collapse when clicking button)
+    const compareBtn = groupHeader.querySelector(".compare-btn");
+    compareBtn?.addEventListener("click", (e) => {
+        e.stopPropagation(); // Don't toggle collapse
+        comparisonManager.open(group);
     });
+
+    // Toggle Collapse
+    groupHeader.addEventListener("click", () => {
+        groupDiv.classList.toggle("collapsed");
+    });
+
+    // Default to collapsed? Or open? User asked for "collapse groups to make it tidier".
+    // Let's default to OPEN but allow collapse, or maybe collapse if many groups?
+    // Let's default to OPEN but styled nicely, unless user explicit asked for default collapsed.
+    // "Kan vi kollapse duplikatgrupper for at det skal se ryddigere ut?" -> impl: clickable header.
+    // Let's start expanded.
 
     return groupDiv;
 }
@@ -163,91 +175,8 @@ function createDuplicateItem(img: ImageInfo, isOriginal: boolean): HTMLElement {
     return item;
 }
 
-// Side by Side Comparison
-function showSideBySide(original: ImageInfo, candidate: ImageInfo, others: ImageInfo[]) {
-    const overlay = document.createElement("div");
-    overlay.className = "modal-overlay open";
 
-    // Simple navigation if others exist
 
-    const updateContent = (cand: ImageInfo) => {
-        const content = overlay.querySelector(".compare-content");
-        if (!content) return;
-
-        content.innerHTML = `
-            <div class="compare-card original">
-                <h3>Original</h3>
-                <div class="compare-img">
-                    <img src="${convertFileSrc(original.path)}">
-                </div>
-                <div class="compare-meta">
-                    <p>${original.filename}</p>
-                    <p>${(original.sizeBytes / 1024).toFixed(1)} KB</p>
-                </div>
-            </div>
-            <div class="compare-card duplicate">
-                <h3>Duplikat</h3>
-                <div class="compare-img">
-                    <img src="${convertFileSrc(cand.path)}">
-                </div>
-                <div class="compare-meta">
-                    <p>${cand.filename}</p>
-                    <p>${(cand.sizeBytes / 1024).toFixed(1)} KB</p>
-                </div>
-                <div class="compare-actions">
-                     <button class="btn btn-danger delete-cand-btn">Slett Duplikat</button>
-                     <button class="btn btn-secondary next-btn" ${others.length === 0 ? 'disabled' : ''}>Neste 👉</button>
-                </div>
-            </div>
-        `;
-
-        content.querySelector(".delete-cand-btn")?.addEventListener("click", async () => {
-            if (confirm("Slett dette duplikatet?")) {
-                await deleteImage(cand.path);
-                // Move to next or close
-                if (others.length > 0) {
-                    updateContent(others.shift()!);
-                } else {
-                    overlay.remove();
-                    // Refresh list?
-                    const item = document.querySelector(`.gallery-item[data-path="${CSS.escape(cand.path)}"]`);
-                    item?.remove();
-                }
-            }
-        });
-
-        content.querySelector(".next-btn")?.addEventListener("click", () => {
-            if (others.length > 0) {
-                updateContent(others.shift()!);
-            }
-        });
-    };
-
-    overlay.innerHTML = `
-        <div class="modal compare-modal">
-            <div class="modal-header">
-                <h3>Sammenlign</h3>
-                <button class="btn-close">✕</button>
-            </div>
-            <div class="modal-content compare-content">
-                <!-- Injected js -->
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(overlay);
-    updateContent(candidate);
-
-    overlay.querySelector(".btn-close")?.addEventListener("click", () => overlay.remove());
-}
-
-async function deleteImage(path: string) {
-    try {
-        await invoke("delete_images", { paths: [path] });
-    } catch (e) {
-        alert(e);
-    }
-}
 
 async function deleteSelectedDuplicates(section: HTMLElement) {
     const checkboxes = section.querySelectorAll(".gallery-checkbox:checked") as NodeListOf<HTMLInputElement>;
@@ -259,13 +188,13 @@ async function deleteSelectedDuplicates(section: HTMLElement) {
 
     try {
         const result = await invoke<OperationResult>("delete_images", { paths: selectedPaths });
-        alert(`Slettet ${result.success} bilder.`);
+        toast.show(`Slettet ${result.success} bilder.`, "success");
 
         selectedPaths.forEach(path => {
             const item = section.querySelector(`.gallery-item[data-path="${CSS.escape(path)}"]`);
             item?.remove();
         });
     } catch (error) {
-        alert(`Feil: ${error}`);
+        toast.show(`Feil: ${error}`, "error");
     }
 }
