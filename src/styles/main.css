@@ -921,3 +921,66 @@
   height: 18px;
   accent-color: var(--color-accent-primary);
 }
+/* Side by Side Comparison */
+.compare-modal {
+    width: 90vw;
+    max-width: 1200px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.compare-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+}
+
+.compare-card {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    border: 2px solid transparent;
+}
+
+.compare-card.original {
+    border-color: var(--color-success);
+}
+
+.compare-card.duplicate {
+    border-color: var(--color-warning);
+}
+
+.compare-img {
+    flex: 1;
+    background: #000;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.compare-img img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.compare-meta {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.compare-actions {
+    margin-top: var(--spacing-md);
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: flex-end;
+}
