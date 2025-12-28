@@ -44,12 +44,20 @@ pub fn compute_exact_hash(path: &Path) -> Result<String, Box<dyn std::error::Err
 }
 
 /// Laster et bilde fra fil og skalerer ned for raskere hashing
+/// "Juksemetode": Bruker Nearest Neighbor for lynrask nedskalering og buffered reader.
 pub fn load_image(path: &Path) -> Result<DynamicImage, Box<dyn std::error::Error>> {
-    // Bruk image::open direkte for å unngå å lese hele filen til en buffer først
-    let img = image::open(path)?;
-    
-    // Skaler ned store bilder for raskere prosessering
-    // Bruk Nearest filter for maksimal hastighet. Det er godt nok for hashing.
+    // 1. Åpne filen med en bufret leser for ytelse
+    let reader = image::io::Reader::open(path)?
+        .with_guessed_format()?;
+
+    // 2. Dekod bildet (dette er fortsatt nødvendig for å få piksldata)
+    // Fremtidig optimalisering: For JPEG kunne vi brukt en decoder som støtter 'scale_factor' (DCT scaling)
+    // for å dekode direkte til en mindre størrelse, men 'image' crate støtter ikke dette fullt ut enda.
+    let img = reader.decode()?;
+
+    // 3. "Juksemetoden" for resizing:
+    // Bruk Nearest Neighbor. Det beholder ikke bildekvaliteten, men er ekstremt raskt.
+    // Vi trenger bare "formen" på bildet for hashing, ikke pene piksler.
     let (width, height) = img.dimensions();
     if width > 512 || height > 512 {
         Ok(img.resize(512, 512, image::imageops::FilterType::Nearest))
