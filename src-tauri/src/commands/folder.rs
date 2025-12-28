@@ -108,7 +108,17 @@ pub async fn find_duplicates(app: tauri::AppHandle, paths: Vec<String>, threshol
     let cache = Arc::new(RwLock::new(HashCache::new(&cache_dir)));
     
     // Beregn hasher parallelt for raskere prosessering
-    let hashed_images: Vec<ImageWithHash> = paths
+    // MINNEOPTIMALISERING: Begrens antall tråder for å unngå at vi dekoder for mange store bilder samtidig i RAM.
+    // Tweak basert på bruker-feedback: Vi har 4-5 GB RAM budsjett og rask NVMe.
+    // 32 tråder x ~150MB per bilde = ~4.8 GB Peak RAM. 
+    // Dette er "Ultra Mode" som makserer hardwaren fullstendig. 🚀
+    let pool = rayon::ThreadPoolBuilder::new()
+        .num_threads(32) 
+        .build()
+        .map_err(|e| format!("Kunne ikke starte trådpool: {}", e))?;
+
+    let hashed_images: Vec<ImageWithHash> = pool.install(|| {
+        paths
         .par_iter()
         .filter_map(|path_str| {
             let path = Path::new(path_str);
@@ -133,8 +143,8 @@ pub async fn find_duplicates(app: tauri::AppHandle, paths: Vec<String>, threshol
                 let read_guard = cache.read().unwrap();
                 if let Some(cached_hash_str) = read_guard.get(path_str, mtime) {
                     let _ = app.emit("progress", serde_json::json!({
-                        "current": 1, // Rayon does not easily support global counter without mutex, simpler to just send "tick"
-                        "total": 0 // Frontend knows total
+                        "current": 1, 
+                        "total": 0 
                     }));
                     return Some(ImageWithHash {
                         info: ImageInfo {
@@ -183,7 +193,8 @@ pub async fn find_duplicates(app: tauri::AppHandle, paths: Vec<String>, threshol
                 }
             }
         })
-        .collect();
+        .collect()
+    });
 
     // Lagre cache til disk etter operasjon
     if let Ok(read_guard) = cache.read() {
