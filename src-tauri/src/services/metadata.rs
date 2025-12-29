@@ -35,7 +35,6 @@ pub fn read_creation_date_with_fallback(path: &Path, use_fallback: bool) -> Opti
 /// Leser opprettelsesdato fra video ved hjelp av FFprobe
 fn read_video_date(path: &Path) -> Option<NaiveDateTime> {
     use std::process::Command;
-    use std::env;
 
     // TODO: For production bundled sidecars, we need to resolve the correct path.
     // Ideally we'd use tauri's path resolver, but we are deep in a service module without AppHandle.

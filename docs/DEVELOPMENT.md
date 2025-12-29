@@ -35,8 +35,26 @@ gh pr create --base dev
 
 - PR skal alltid gå til `dev`, ikke `master`
 - Beskriv hva endringen gjør
+### Installasjon (Første gang)
+
+```bash
+git clone https://github.com/Hawk-on/HeimdallSort.git
+cd HeimdallSort
+npm install
+
+# Last ned nødvendige binærfiler (ffmpeg/ffprobe) for videostøtte
+npm run setup 
+
+npm run tauri dev
+```
+
+### Pull Requests
+
+- PR skal alltid gå til `dev`, ikke `master`
+- Beskriv hva endringen gjør
 - Legg til screenshots for UI-endringer
 - Sørg for at koden bygger (`npm run tauri build`)
+- Sørg for at dependencies er lastet ned (`npm run setup`)
 
 ## Kodekonvensjoner
 
@@ -83,7 +101,8 @@ pub fn scan_directory(path: &str) -> Result<Vec<ImageInfo>, ScanError> {
 |------|------------|----------|
 | TypeScript | camelCase | `imageService.ts` |
 | Rust | snake_case | `image_service.rs` |
-| CSS | kebab-case | `image-gallery.css` |
+| CSS (Modul) | kebab-case | `src/styles/modules/gallery.css` |
+| CSS (Komp) | kebab-case | `src/styles/components/buttons.css` |
 
 ## Commit-meldinger
 

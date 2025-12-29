@@ -3,14 +3,13 @@
 //! Støtter både eksakt hashing (SHA-256) og perceptuell hashing (pHash, dHash, aHash)
 //! Optimalisert for store bildesamlinger
 
-use image::{DynamicImage, GenericImageView, Rgba, RgbaImage};
+// use image::{DynamicImage, GenericImageView, Rgba, RgbaImage};
+use image::{DynamicImage, GenericImageView};
 use img_hash::{HashAlg, HasherConfig, ImageHash};
 use sha2::{Digest, Sha256};
 use std::fs::File;
 use std::io::Read;
-use std::io::Read;
 use std::path::Path;
-use exif;
 
 /// Hashe-typer tilgjengelig for duplikatdeteksjon
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -75,22 +74,10 @@ pub fn compute_partial_hash(path: &Path) -> Result<String, Box<dyn std::error::E
 
 /// Forsøker å lese embedded thumbnail fra EXIF-data
 /// Dette er ekstremt mye raskere enn å dekode hele bildet
-fn read_embedded_thumbnail(path: &Path) -> Option<DynamicImage> {
-    let file = std::fs::File::open(path).ok()?;
-    let mut bufreader = std::io::BufReader::new(&file);
-    let exifreader = exif::Reader::new();
-    
-    // Forsøk å lese EXIF-data
-    if let Ok(exif) = exifreader.read_from_container(&mut bufreader) {
-        // Sjekk om det finnes thumbnail-data
-        if let Some(thumb_data) = exif.get_thumbnail() {
-            // Prøv å dekode thumbnail-data som et bilde
-            // Vi bruker image::load_from_memory som gjetter formatet (vanligvis JPEG)
-            if let Ok(img) = image::load_from_memory(thumb_data) {
-                return Some(img);
-            }
-        }
-    }
+fn read_embedded_thumbnail(_path: &Path) -> Option<DynamicImage> {
+    // Optimization temporarily disabled: rexif crate 0.7 missing thumbnail field access
+    // and kamadak-exif requires complex offset handling.
+    // Falling back to full decode for stability.
     None
 }
 

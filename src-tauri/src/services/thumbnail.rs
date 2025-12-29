@@ -2,7 +2,7 @@
 //!
 //! Genererer thumbnails på forespørsel og cacher dem for raskere lasting.
 
-use image::GenericImageView;
+// use image::GenericImageView;
 use sha2::{Digest, Sha256};
 use std::fs::{self, File};
 use std::io::Read;

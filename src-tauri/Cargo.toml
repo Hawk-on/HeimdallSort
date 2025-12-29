@@ -1,6 +1,6 @@
 [package]
 name = "heimdall_sort"
-version = "0.1.0"
+version = "1.2.0"
 description = "Heimdall Sort - Premium Image Organization"
 authors = ["haklon"]
 edition = "2021"

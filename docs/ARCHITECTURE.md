@@ -130,11 +130,12 @@ interface DuplicateGroup {
 ```
 
 ### 3. Services (`src-tauri/src/services/`)
-- **scanner.rs**: Rekursiv filskanning (WalkDir), optimalisert for ytelse.
-- **hashing.rs**: Bildehashing (pHash, BK-Tree) for duplikatdeteksjon.
-- **thumbnail.rs**: Generering og caching av thumbnails for rask visning.
-- **metadata.rs**: Leser EXIF-data for sortering.
+- **scanner.rs**: Rekursiv filskanning, støtter nå også videofiler (.mp4, .mov, etc).
+- **hashing.rs**: Bildehashing (pHash, BK-Tree) for duplikatdeteksjon. "Hybrid" deteksjon (Størrelse+Partial Hash -> Visuell Hash).
+- **thumbnail.rs**: Generering og caching av thumbnails. Bruker `ffmpeg` for video-thumbnails.
+- **metadata.rs**: Leser EXIF-data (bilder) og FFprobe-data (video) for sortering.
 - **sorter.rs**: Håndterer filoperasjoner (sortering, sletting, flytting).
+- **sidecar.rs**: Håndterer tilhørende filer (.xmp, .json, .aae) automatisk ved filoperasjoner.
 - **cache.rs**: Persistent lagring av hasher for å unngå reskanning.
 
 ### 4. Viktige Biblioteker

@@ -36,3 +36,4 @@ coverage/
 # Tauri
 src-tauri/WixTools/
 src-tauri/target/
+src-tauri/binaries/
