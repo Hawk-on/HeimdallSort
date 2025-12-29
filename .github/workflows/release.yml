@@ -55,7 +55,6 @@ jobs:
 
       - name: Get Release Notes
         id: release_notes
-        if: matrix.platform == 'ubuntu-22.04' # Only need to generate notes once (or on all, doesn't matter much but cleaner)
         shell: bash
         run: |
           NOTES=$(node scripts/extract-changelog.mjs)
