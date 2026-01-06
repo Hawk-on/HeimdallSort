@@ -15,6 +15,7 @@ use crate::services::cache::HashCache;
 pub struct ImageInfo {
     pub path: String,
     pub filename: String,
+    pub extension: String,
     pub size_bytes: u64,
 }
 
@@ -66,6 +67,7 @@ pub async fn scan_folder(path: String) -> Result<ScanResult, String> {
         .map(|img| ImageInfo {
             path: img.path,
             filename: img.filename,
+            extension: img.extension,
             size_bytes: img.size_bytes,
         })
         .collect();
@@ -149,11 +151,14 @@ pub async fn find_duplicates(app: tauri::AppHandle, paths: Vec<String>, threshol
              let size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
              let filename = path.file_name().unwrap_or_default().to_string_lossy().to_string();
              
+             let extension = path.extension().unwrap_or_default().to_string_lossy().to_string().to_lowercase();
+             
              let output_key = format!("{}_{}", size, hash); // Unik nøkkel for eksakt gruppe
              
              exact_groups.entry(output_key).or_default().push(ImageInfo {
                  path: path_str.clone(),
                  filename,
+                 extension,
                  size_bytes: size
              });
         }
@@ -212,13 +217,15 @@ pub async fn find_duplicates(app: tauri::AppHandle, paths: Vec<String>, threshol
             let size_bytes = metadata.len();
             let filename = path.file_name().unwrap_or_default().to_string_lossy().to_string();
 
+            let extension = path.extension().unwrap_or_default().to_string_lossy().to_string().to_lowercase();
+
             // Sjekk cache
             {
                 let read_guard = cache.read().unwrap();
                 if let Some(cached_hash_str) = read_guard.get(path_str, mtime) {
                     let _ = app_handle.emit("progress", serde_json::json!({ "tick": true }));
                     return Some(ImageWithHash {
-                        info: ImageInfo { path: path_str.clone(), filename, size_bytes },
+                        info: ImageInfo { path: path_str.clone(), filename, extension, size_bytes },
                         hash: cached_hash_str,
                     });
                 }
@@ -236,7 +243,7 @@ pub async fn find_duplicates(app: tauri::AppHandle, paths: Vec<String>, threshol
                             }
                             let _ = app_handle.emit("progress", serde_json::json!({ "tick": true }));
                             Some(ImageWithHash {
-                                info: ImageInfo { path: path_str.clone(), filename, size_bytes },
+                                info: ImageInfo { path: path_str.clone(), filename, extension, size_bytes },
                                 hash: hash_str,
                             })
                         }

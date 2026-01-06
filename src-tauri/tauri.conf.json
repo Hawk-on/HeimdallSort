@@ -50,7 +50,6 @@
     },
     "plugins": {
         "shell": {
-            "all": true,
             "open": true
         }
     }
